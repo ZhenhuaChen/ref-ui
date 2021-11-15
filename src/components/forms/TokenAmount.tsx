@@ -43,7 +43,7 @@ export default function TokenAmount({
       number: balances ? balances[token.id] : '0',
     });
 
-  const isSignedIn = wallet.isSignedIn();
+  const isSignedIn = wallet.isSignedIn() || window.accountId;
 
   return (
     <>

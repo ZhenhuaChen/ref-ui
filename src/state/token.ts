@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { connect, keyStores} from 'near-api-js'
 import { wallet } from '../services/near';
 import {
   ftGetBalance,
@@ -17,6 +18,8 @@ import {
   toRoundedReadableNumber,
 } from '~utils/numbers';
 import { toRealSymbol } from '~utils/token';
+import getConfig from '~services/config';
+const config = getConfig();
 
 export const useToken = (id: string) => {
   const [token, setToken] = useState<TokenMetadata>();
@@ -66,7 +69,7 @@ export const useUserRegisteredTokens = () => {
         Promise.all(tokenIds.map((tokenId) => ftGetTokenMetadata(tokenId)))
       )
       .then(setTokens);
-  }, []);
+  }, [window.accountId]);
 
   return tokens;
 };
@@ -78,7 +81,7 @@ export const useTokenBalances = () => {
     getTokenBalances()
       .then(setBalances)
       .catch(() => setBalances({}));
-  }, []);
+  }, [window.accountId]);
 
   return balances;
 };
@@ -88,13 +91,26 @@ export const getDepositableBalance = async (
   decimals?: number
 ) => {
   if (tokenId === 'NEAR') {
-    if (wallet.isSignedIn()) {
+    if (wallet.isSignedIn()){
       return wallet
         .account()
         .getAccountBalance()
         .then(({ available }) => {
+          console.log(available,'web')
+          console.log(toReadableNumber(decimals, available))
           return toReadableNumber(decimals, available);
         });
+    } else if(window.accountId) {
+      const near = await connect({
+        keyStore: new keyStores.InMemoryKeyStore(),
+        ...config,
+      });
+      return (await near
+        .account(window.accountId))
+            .getAccountBalance()
+            .then((res:any) => {
+              return toReadableNumber(decimals, res.available);
+            })
     } else {
       return toReadableNumber(decimals, '0');
     }

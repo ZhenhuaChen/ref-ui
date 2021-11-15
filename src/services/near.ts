@@ -93,19 +93,23 @@ export const executeMultipleTransactions = async (
       return wallet.createTransaction({
         receiverId: t.receiverId,
         nonceOffset: i + 1,
-        actions: t.functionCalls.map((fc) =>
-          functionCall(
+        actions: t.functionCalls.map((fc:any) =>{
+          if(window.wallet){
+            return fc
+          }
+          return functionCall(
             fc.methodName,
             fc.args,
             getGas(fc.gas),
             getAmount(fc.amount)
           )
+        }
         ),
       });
     })
   );
 
-  return wallet.requestSignTransactions(nearTransactions, callbackUrl);
+  return window.wallet.requestSignTransactions({ transactions: nearTransactions });
 };
 
 export const refFarmFunctionCall = ({

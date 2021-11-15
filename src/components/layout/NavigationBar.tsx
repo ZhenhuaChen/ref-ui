@@ -33,6 +33,7 @@ import { useRefPrice } from '~state/account';
 import { toPrecision } from '~utils/numbers';
 import { useMenuItems } from '~utils/menu';
 import { MobileNavBar } from './MobileNav';
+import WalletContainer from '~container/WalletContainer';
 
 function Anchor({
   to,
@@ -66,17 +67,31 @@ function Anchor({
 }
 
 function AccountEntry() {
+  const history = useHistory();
   const userTokens = useUserRegisteredTokens();
   const balances = useTokenBalances();
-
   const [hover, setHover] = useState(false);
-  const [account, network] = wallet.getAccountId().split('.');
+
+  const { accountId } = WalletContainer.useContainer();
+
+  const accountSource =  wallet.getAccountId() || accountId;
+  const [account, network] = accountSource ? accountSource.split('.') : ['',''];
   const niceAccountId = `${account.slice(0, 10)}...${network || ''}`;
-  const history = useHistory();
 
   const accountName =
-    account.length > 10 ? niceAccountId : wallet.getAccountId();
+    account.length > 10 ? niceAccountId : accountSource;
+
   if (!userTokens || !balances) return null;
+
+  const connectWalletSdk = () => {
+    window.wallet
+      .requestSignIn({ contractId: REF_FARM_CONTRACT_ID })
+      .then((response: any) => {
+        if (response.accessKey) {
+          location.reload();
+        }
+      });
+  };
 
   return (
     <div className="user text-xs text-center justify-end pt-6 h-full right-20 absolute top-0 z-30">
@@ -90,9 +105,14 @@ function AccountEntry() {
         }}
       >
         <div className="inline-flex py-1 items-center justify-center rounded-full bg-gray-700 px-5 absolute top-5 right-2">
-          <div className="pr-1">
-            <Near />
-          </div>
+          {accountName ? (
+            <div className="pr-1 text-white">插件{accountName}</div>
+          ) : (
+            <div onClick={() => connectWalletSdk()} className="text-white w-10 h-5">
+              插件快速链接
+            </div>
+          )}
+
           <div className="overflow-ellipsis overflow-hidden whitespace-nowrap account-name text-white">
             {wallet.isSignedIn() ? (
               accountName

@@ -17,6 +17,7 @@ import { Balances } from '../components/deposit/Deposit';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { ConnectToNearBtn } from '~components/button/Button';
 import { BigNumber } from 'bignumber.js';
+import WalletContainer from '~container/WalletContainer';
 
 function DepositBtn(props: {
   amount?: string;
@@ -55,6 +56,9 @@ function DepositBtn(props: {
             deposit({
               token,
               amount,
+            }).then(res=>{
+              console.log('99999')
+              console.log(res)
             });
           }
         }}
@@ -80,6 +84,7 @@ export default function DepositPage() {
   const userTokens = useUserRegisteredTokens();
   const max = useDepositableBalance(selectedToken?.id, selectedToken?.decimals);
   const intl = useIntl();
+  const { accountId } = WalletContainer.useContainer();
 
   useEffect(() => {
     if (id && tokens) {
@@ -89,16 +94,6 @@ export default function DepositPage() {
 
   if (!tokens || !userTokens) return <Loading />;
   if (!registeredTokens || !balances) return <Loading />;
-
-  const handleSearch = (value: string) => {
-    const result = tokens.filter(
-      ({ name }) =>
-        name.includes(value) ||
-        name.includes(value.toLocaleLowerCase()) ||
-        name.includes(value.toLocaleUpperCase())
-    );
-    // setTokenList(result);
-  };
 
   return (
     <div className="flex items-center flex-col xl:w-1/3 2xl:w-1/3 3xl:w-1/4 lg:w-1/2 md:w-5/6 xs:w-full xs:p-2 m-auto">
@@ -117,7 +112,7 @@ export default function DepositPage() {
           text={selectedToken.symbol}
           balances={balances}
         />
-        {wallet.isSignedIn() ? (
+       {wallet.isSignedIn() || accountId ? (
           <DepositBtn balance={max} amount={amount} token={selectedToken} />
         ) : (
           <ConnectToNearBtn />

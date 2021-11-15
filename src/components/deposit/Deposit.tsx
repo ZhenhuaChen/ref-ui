@@ -132,7 +132,7 @@ export function TokenList(props: {
 
   return (
     <div className="divide-y divide-gray-600">
-      {tokens.map((token) => {
+      {tokens && tokens.map((token) => {
         const balance = balances[token.id] || '0';
         if (balance === '0' && hideEmpty) return null;
 
@@ -150,7 +150,7 @@ export function TokenList(props: {
           />
         );
       })}
-      {tokens.length === 0 ? (
+      {tokens && tokens.length === 0 ? (
         <div className="text-center text-gray-600 text-xs font-semibold pt-2 pb-2">
           <FormattedMessage
             id="no_tokens_deposited"

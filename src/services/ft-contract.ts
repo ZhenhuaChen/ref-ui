@@ -32,10 +32,19 @@ export const ftViewFunction = (
   return wallet.account().viewFunction(tokenId, methodName, args);
 };
 
+export const ftViewFunction2 = async (
+  tokenId: string,
+  {
+  methodName,
+  args,
+}: RefFiViewFunctionOptions) => {
+  return window.wallet.viewFunctionCall({contractId:tokenId, methodName:methodName, params:args});
+};
+
 export const ftGetBalance = (tokenId: string) => {
-  return ftViewFunction(tokenId, {
+  return ftViewFunction2(tokenId, {
     methodName: 'ft_balance_of',
-    args: { account_id: wallet.getAccountId() },
+    args: { account_id: wallet.getAccountId() || window.accountId},
   });
 };
 

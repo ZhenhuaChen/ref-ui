@@ -27,6 +27,14 @@ export default class SpecialWallet extends WalletConnection {
     actions: Action[];
     nonceOffset?: number;
   }) {
+    if (window.wallet.authData) {
+      this._authData = window.wallet.authData;
+      this._connectedAccount = new SpecialWalletAccount(
+        this,
+        this._near.connection,
+        this._authData.accountId
+      );
+    }
     return this._connectedAccount.createTransaction({
       receiverId,
       actions,
@@ -50,7 +58,7 @@ class SpecialWalletAccount extends ConnectedWalletAccount {
     nonceOffset?: number;
   }) {
     const localKey = await this.connection.signer.getPublicKey(
-      this.accountId,
+      this.accountId || window.accountId,
       this.connection.networkId
     );
     let accessKey = await this.accessKeyForTransaction(
@@ -71,7 +79,7 @@ class SpecialWalletAccount extends ConnectedWalletAccount {
     const nonce = accessKey.access_key.nonce + nonceOffset;
 
     return createTransaction(
-      this.accountId,
+      this.accountId || window.accountId,
       publicKey,
       receiverId,
       nonce,

@@ -16,7 +16,7 @@ export interface RefPrice {
 export const initializeAccount = () => {
   return refFiFunctionCall(
     storageDepositAction({
-      accountId: wallet.getAccountId(),
+      accountId: wallet.getAccountId() || window.accountId,
       registrationOnly: true,
       amount: ACCOUNT_MIN_STORAGE_AMOUNT,
     })

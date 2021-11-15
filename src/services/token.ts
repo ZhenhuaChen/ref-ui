@@ -28,7 +28,7 @@ export const checkTokenNeedsStorageDeposit = async (tokenId: string) => {
   let storageNeeded: math.MathType = 0;
   const [registeredTokens, balance] = await Promise.all([
     getUserRegisteredTokens(),
-    currentStorageBalance(wallet.getAccountId()),
+    currentStorageBalance(wallet.getAccountId() || window.accountId),
   ]);
 
   if (!balance) {
@@ -197,19 +197,19 @@ export interface TokenBalancesView {
 export const getTokenBalances = (): Promise<TokenBalancesView> => {
   return refFiViewFunction({
     methodName: 'get_deposits',
-    args: { account_id: wallet.getAccountId() },
+    args: { account_id: wallet.getAccountId() || window.accountId },
   });
 };
 
 export const getTokenBalance = (tokenId: string): Promise<number> => {
   return refFiViewFunction({
     methodName: 'get_deposit',
-    args: { account_id: wallet.getAccountId(), token_id: tokenId },
+    args: { account_id: wallet.getAccountId() || window.accountId, token_id: tokenId },
   });
 };
 
 export const getUserRegisteredTokens = (
-  accountId: string = wallet.getAccountId()
+  accountId: string = wallet.getAccountId() || window.accountId
 ): Promise<string[]> => {
   return refFiViewFunction({
     methodName: 'get_user_whitelisted_tokens',
